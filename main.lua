@@ -68,26 +68,30 @@ registercallback("onPlayerStep", function(player)
 	end
 end)
 
--- Find the teleporter on stage start-up
-registercallback("onStageEntry", function()
+
+-- Looking for the teleporter to be on screen
+registercallback("onPlayerStep", function()
 	-- Find the instance of the player and saving their x,y coordinates
 	local hero = Object.find("P", "vanilla")
 	local heroCoord = hero:findNearest(16,16)
 	local heroX = heroCoord.x
 	local heroY = heroCoord.y
-
+	
 	--Find the instance of the teleporter based off player coordinates
 	local teleporter = Object.find("Teleporter", "vanilla")
 	local teleLocation = teleporter:findNearest(heroX,heroY)
 	local teleX = teleLocation.x
 	local teleY = teleLocation.y
-
-	-- Just checking to see if it all worked
-	print(teleX)
-	print(teleY)
-	print(heroX)
-	print(heroY)
+	
+	-- Print when we find the teleporter on screen
+	if(teleX < (heroX + camera.width/2) and (teleX > (heroX - camera.width/2))) then
+		if  ((teleY < (heroY + camera.height/2)) and (teleY > (heroY - camera.height/2))) then
+			print('I found the teleporter!')
+		end
+	end
+	
 end)
+
 
 
 --[[ below is sample code from the example mod
