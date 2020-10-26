@@ -13,37 +13,57 @@ artifact.loadoutText = "Controls the player so you don't have to!"
 
 local lMove = 1
 local rMove = 0
+local upMove = 0
 
 -- Anything under the onPlayerStep callback will be run on every frame
 registercallback("onPlayerStep", function(player)
-	local upMove = 0
 	local maxJump = player:get("pVmax")*8
 	--print("height", maxJump) -- it's 3
-
-	-- left decreases x, down increase y 
-	print("player.x, player.y", player.x , player.y)
+		local stage = Stage.progression[2][1]
+		print(stage)
+	-- left decreases x, down increase y
+	--print("player.x, player.y", player.x , player.y)
 	if artifact.active then
 		-- All necessary code should begin below this comment line
 		-- Move right until you hit a wall, then turn around--
 		if rMove == 1 and Stage.collidesRectangle(player.x + 2, player.y - 4, player.x+7, player.y + 4 ) then
 			rMove = 0
 			lMove = 1
-			print("moving right & hit rectangle:", player.x + 2, player.y - 4, player.x+7, player.y + 4)
+
+			--print("moving right & hit rectangle:", player.x + 2, player.y - 4, player.x+7, player.y + 4)
 		-- Move left until you hit a wall, then turn around--
 		elseif lMove == 1 and Stage.collidesRectangle(player.x - 7, player.y - 4, player.x-2, player.y + 4) then
 			lMove = 0
 			rMove = 1
-			print("moving left & hit rectangle:", player.x - 7, player.y - 4, player.x-2, player.y + 4)
-		else
-			print("conditional:", Stage.collidesRectangle(player.x + 2, player.y - 4 + 1, player.x+7, player.y + 4) == not Stage.collidesRectangle(player.x - 7, player.y - 4 + 1 , player.x-2, player.y + 4))
-			if Stage.collidesRectangle(player.x + 2, player.y - 4 + 1, player.x+7, player.y + 4) == not Stage.collidesRectangle(player.x - 7, player.y - 4 + 1 , player.x-2, player.y + 4) then
-				upMove = 1
-				print("jumping")
-			end
+
+			--print("moving left & hit rectangle:", player.x - 7, player.y - 4, player.x-2, player.y + 4)
+
+
 		end
+
+		--Jumps when there is an obstacle not too high to jump
+		if (player:collidesMap(player.x+20, player.y )) and( not player:collidesMap(player.x+17, player.y-40 ) )and ( rMove == 1 )then
+		upMove = 1
+		end
+
+		if (player:collidesMap(player.x-20, player.y )) and (not player:collidesMap(player.x-17, player.y-40 )) and (lMove == 1 )then
+		upMove = 1
+		end
+
+		--Jumps where there is a void and a platform close enough to jump
+		if not player:collidesMap(player.x-5, player.y+1) and player:collidesMap(player.x-30, player.y+1) and (lMove == 1 )then
+		upMove = 1
+		end
+
+		if (not player:collidesMap(player.x+5, player.y+1)) and player:collidesMap(player.x+30, player.y+1) and (rMove == 1 )then
+		upMove = 1
+		end
+
+
 		player:set("moveLeft", lMove)
 		player:set("moveRight", rMove)
-		--player:set("moveUp", upMove)
+		player:set("moveUp", upMove)
+		upMove = 0
 		print("Moves:", lMove, " ", rMove, " ", upMove)
 	end
 end)
@@ -55,13 +75,13 @@ registercallback("onStageEntry", function()
 	local heroCoord = hero:findNearest(16,16)
 	local heroX = heroCoord.x
 	local heroY = heroCoord.y
-		
+
 	--Find the instance of the teleporter based off player coordinates
 	local teleporter = Object.find("Teleporter", "vanilla")
 	local teleLocation = teleporter:findNearest(heroX,heroY)
 	local teleX = teleLocation.x
 	local teleY = teleLocation.y
-	
+
 	-- Just checking to see if it all worked
 	print(teleX)
 	print(teleY)
